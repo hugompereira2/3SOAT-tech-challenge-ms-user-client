@@ -7,14 +7,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  pull-requests: read
+  pull-requests: read # allows SonarCloud to decorate PRs with analysis results
 
 env:
   AZURE_CONTAINER_REGISTRY: "acrrepository"
   RESOURCE_GROUP: "tc-g8-resources"
   CLUSTER_NAME: "tech-challenge-k8s"
+  DEPLOYMENT_MANIFEST_PATH: "https://raw.githubusercontent.com/rafaelfelixmoraes/3SOAT-tech-challenge/main/k8s/"
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
 
 jobs:
   deploy:
@@ -23,11 +23,13 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
+      # Checks out the repository this file is in
       - name: Set up github checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
+      # Setup JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -56,12 +58,9 @@ jobs:
         with:
           gradle-version: '8.3'
 
-        # Gradle build with SonarCloud integration
+      # Gradle build with SonarCloud integration
       - name: Build with Gradle 8.3
         run: gradle clean build sonar --info
-
-      # Checks out the repository this file is in
-      - uses: actions/checkout@v3
 
       # Logs in with your Azure credentials
       - name: Azure login
@@ -78,6 +77,7 @@ jobs:
 
       # Retrieves your Azure Kubernetes Service cluster's kubeconfig file
       - name: Get K8s context
+        if: github.ref == 'refs/heads/main'
         uses: azure/aks-set-context@v3
         with:
           resource-group: ${{ env.RESOURCE_GROUP }}
@@ -85,14 +85,13 @@ jobs:
           admin: 'true'
           use-kubelogin: 'true'
 
-      - name: Testing on a k8s Kind Cluster
-        uses: helm/kind-action@v1.4.0
-      ## makes sure cluster is up and running
-      - run: |
+      - name: Testing Cluster to check context
+        if: github.ref == 'refs/heads/main'
+        run: |
           kubectl cluster-info
           kubectl get nodes
-      - name: Preparing cluster
-        ## Commands that setup the cluster as per my project needs
+
+      - name: Deploys application using manifest files
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           kubectl apply -f https://raw.githubusercontent.com/hugompereira2/3SOAT-tech-challenge-ms-user-client/main/k8s/application-tech-challenge-products.yaml
@@ -101,3 +100,10 @@ jobs:
           sleep 5
           kubectl apply -f https://raw.githubusercontent.com/hugompereira2/3SOAT-tech-challenge-ms-user-client/main/k8s/redis-tech-challenge-products.yaml
           sleep 5
+
+      # Deploys application based on given manifest file
+      #- name: Deploys application with Azure deploy
+      #  uses: Azure/k8s-deploy@v4
+      #  with:
+      #    action: deploy
+      #    manifests: ${{ env.DEPLOYMENT_MANIFEST_PATH }}
