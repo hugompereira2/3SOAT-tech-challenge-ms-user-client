@@ -2,7 +2,6 @@ package br.com.tech.challenge.api;
 
 import br.com.tech.challenge.domain.dto.ClienteDTO;
 import br.com.tech.challenge.domain.dto.RequestClienteCpfDTO;
-import br.com.tech.challenge.domain.dto.RequestClienteIdDTO;
 import br.com.tech.challenge.domain.entidades.Cliente;
 import br.com.tech.challenge.servicos.ClienteService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -86,7 +85,6 @@ class ClienteControllerTest {
                 .andExpect(jsonPath("$.email").value(clienteDTO.getEmail()))
                 .andExpect(jsonPath("$.cpf").value(clienteDTO.getCpf()));
     }
-
 
     @DisplayName("Deve retornar erro ao anonimizar um cliente inválido")
     @Test
