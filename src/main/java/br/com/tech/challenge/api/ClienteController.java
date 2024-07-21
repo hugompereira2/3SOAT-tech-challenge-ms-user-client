@@ -1,9 +1,7 @@
 package br.com.tech.challenge.api;
 
-import br.com.tech.challenge.domain.dto.ClienteCheckInDTO;
-import br.com.tech.challenge.domain.dto.ClienteCpfDTO;
-import br.com.tech.challenge.domain.dto.ClienteDTO;
-import br.com.tech.challenge.domain.dto.RequestClienteCpfDTO;
+import br.com.tech.challenge.domain.dto.*;
+import br.com.tech.challenge.domain.entidades.Cliente;
 import br.com.tech.challenge.servicos.ClienteService;
 import br.com.tech.challenge.utils.CpfUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,6 +45,19 @@ public class ClienteController {
         return ResponseEntity.status(CREATED).body(mapper.map(clienteService.save(clienteDTO), ClienteDTO.class));
     }
 
+
+    @Operation(description = "Endpoint para anonimizar um Cliente com id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Cliente anonimizado com sucesso."),
+            @ApiResponse(responseCode = "400", description = "Cliente inválido."),
+            @ApiResponse(responseCode = "409", description = "Cliente já anonimizado."),
+            @ApiResponse(responseCode = "500", description = "Ocorreu um erro no servidor.")
+    })
+    @PostMapping("/anonymize")
+    public ResponseEntity<Cliente> anonymizeClient(@RequestBody @Valid RequestClienteIdDTO clienteIdDTO) {
+
+        return ResponseEntity.ok(clienteService.anonymizeClientById(clienteIdDTO.getId()));
+    }
 
     @Operation(description = "Endpoint para criar um Cliente somente com cpf")
     @ApiResponses(value = {

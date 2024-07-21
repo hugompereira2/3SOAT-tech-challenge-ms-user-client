@@ -2,6 +2,7 @@ package br.com.tech.challenge.api;
 
 import br.com.tech.challenge.domain.dto.ClienteDTO;
 import br.com.tech.challenge.domain.dto.RequestClienteCpfDTO;
+import br.com.tech.challenge.domain.dto.RequestClienteIdDTO;
 import br.com.tech.challenge.domain.entidades.Cliente;
 import br.com.tech.challenge.servicos.ClienteService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,6 +68,35 @@ class ClienteControllerTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.nome").value(clienteDTO.getNome()));
 
+    }
+
+    @DisplayName("Deve anonimizar um cliente com sucesso")
+    @Test
+    void shouldAnonymizeClienteSuccess() throws Exception {
+        Cliente clienteDTO = setAnonymousCliente();
+
+        mockMvc.perform(post(ROTA_CLIENTES + "/anonymize")
+                        .content(mapper.writeValueAsString(clienteDTO.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(clienteDTO.getId()))
+                .andExpect(jsonPath("$.nome").value(clienteDTO.getNome()))
+                .andExpect(jsonPath("$.email").value(clienteDTO.getEmail()))
+                .andExpect(jsonPath("$.cpf").value(clienteDTO.getCpf()));
+    }
+
+
+    @DisplayName("Deve retornar erro ao anonimizar um cliente inválido")
+    @Test
+    void shouldReturnErrorAnonymizeCliente() throws Exception {
+        mockMvc.perform(post(ROTA_CLIENTES + "/anonymize")
+                        .content(mapper.writeValueAsString(1L))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 
     @DisplayName("Deve retornar erro ao criar um cliente inválido")
@@ -168,6 +198,15 @@ class ClienteControllerTest {
                 .nome("Anthony Samuel Joaquim Teixeira")
                 .email("anthony.samuel.teixeira@said.adv.br")
                 .cpf("143.025.400-95")
+                .build();
+    }
+
+    private Cliente setAnonymousCliente() {
+        return Cliente.builder()
+                .id(99L)
+                .nome("Cliente Anonimo")
+                .email("")
+                .cpf("999.999.999-99")
                 .build();
     }
 

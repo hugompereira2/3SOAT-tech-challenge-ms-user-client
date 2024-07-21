@@ -35,6 +35,18 @@ public class ClienteService {
         return clienteRepository.save(mapper.map(clienteDTO, Cliente.class));
     }
 
+    @Transactional
+    public Cliente anonymizeClientById(Long id) {
+        log.info("anonimizar cliente por ID {}", id);
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Cliente não encontrado"));
+        cliente.setNome("Cliente Anonimo");
+        cliente.setCpf("999.999.999-99");
+        cliente.setEmail("");
+        log.info("Cliente anonimizado com sucesso");
+        return clienteRepository.save(cliente);
+    }
+
     public Cliente saveClientWithCpf(String cpf) {
         log.info("Salvando cliente com cpf {}", cpf);
         validateIfClientExistsByCpf(cpf);
