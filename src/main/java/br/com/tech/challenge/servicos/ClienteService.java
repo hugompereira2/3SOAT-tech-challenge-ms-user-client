@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -27,6 +28,9 @@ public class ClienteService {
     private final ClienteRepository clienteRepository;
 
     private final ModelMapper mapper;
+
+    @Value("${cliente.anonymize.cpf}")
+    private String anonimizeCpf;
 
     @Transactional
     public Cliente save(ClienteDTO clienteDTO) {
@@ -41,7 +45,7 @@ public class ClienteService {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Cliente não encontrado"));
         cliente.setNome("Cliente Anonimo");
-        cliente.setCpf("999.999.999-99");
+        cliente.setCpf(anonimizeCpf);
         cliente.setEmail("");
         log.info("Cliente anonimizado com sucesso");
         return clienteRepository.save(cliente);
