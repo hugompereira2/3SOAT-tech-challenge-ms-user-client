@@ -1,6 +1,10 @@
 package br.com.tech.challenge.api;
 
-import br.com.tech.challenge.domain.dto.*;
+import br.com.tech.challenge.domain.dto.ClienteCheckInDTO;
+import br.com.tech.challenge.domain.dto.ClienteCpfDTO;
+import br.com.tech.challenge.domain.dto.ClienteDTO;
+import br.com.tech.challenge.domain.dto.RequestClienteCpfDTO;
+import br.com.tech.challenge.domain.dto.RequestClienteIdDTO;
 import br.com.tech.challenge.domain.entidades.Cliente;
 import br.com.tech.challenge.servicos.ClienteService;
 import br.com.tech.challenge.utils.CpfUtils;
